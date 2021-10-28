@@ -1,17 +1,16 @@
-package ru.mail.senokosov.artem;
+package ru.mail.senokosov.artem.converter;
+
+import ru.mail.senokosov.artem.validation.InputValidator;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class ReversePolishNotationConverter {
 
     private static String originExpression;
     private static String preparedExpression;
-    private static List<String> output = new LinkedList<>();
-    private static Stack<String> stackOperators = new Stack<>();
+    private static final List<String> output = new LinkedList<>();
+    private static final Deque<String> stackOperators = new ArrayDeque<>();
     private static int indexOfCurrentToken = 0;
     private static String token = "";
     private static String previousToken = "";
@@ -36,7 +35,7 @@ public class ReversePolishNotationConverter {
 
     private static List<String> sortingStation() throws IOException {
 
-        StringTokenizer tokenizer = MathElements.getTokenizer(preparedExpression);
+        StringTokenizer tokenizer = InputValidator.getTokenizer(preparedExpression);
 
         if (tokenizer.countTokens() < 2) {
             throw new IOException("incomplete expression");
@@ -51,14 +50,14 @@ public class ReversePolishNotationConverter {
 
             checkTokens(previousToken, token);
 
-            if (MathElements.isNumber(token)) {
+            if (InputValidator.isNumeric(token)) {
                 output.add(token);
-                continue analyze_next_token;
+                continue;
             }
 
             if (token.equals("(")) {
                 stackOperators.push(token);
-                continue analyze_next_token;
+                continue;
             }
 
             if (token.equals(",")) {
@@ -68,16 +67,14 @@ public class ReversePolishNotationConverter {
                     output.add(stackOperators.pop());
                 }
                 stackOperators.push(token);
-                continue analyze_next_token;
+                continue;
             }
 
             if (token.equals(")")) {
-                byte delimiterCounter = 0;
-                String top = "";
-                while (!stackOperators.empty()) {
+                String top;
+                while (!stackOperators.isEmpty()) {
                     top = stackOperators.pop();
                     if (top.equals(",")) {
-                        delimiterCounter++;
                         continue;
                     }
                     if (!top.equals("(")) {
@@ -89,23 +86,23 @@ public class ReversePolishNotationConverter {
                 bugNoLeftBracket();
             }
 
-            if (MathElements.isOperator(token)) {
+            if (InputValidator.isOperator(token)) {
 
                 while (!stackOperators.isEmpty()
-                        && MathElements.isOperator(stackOperators.peek())
-                        && MathElements.priorityComparator(token,
+                        && InputValidator.isOperator(stackOperators.peek())
+                        && InputValidator.priorityComparator(token,
                         stackOperators.peek()) <= 0) {
 
                     output.add(stackOperators.pop());
                 }
                 stackOperators.push(token);
-                continue analyze_next_token;
+                continue;
             }
 
             errorUnknownArgument(token);
         }
 
-        if (!(MathElements.isNumber(token) || token.equals(")") || token.equals("%"))) {
+        if (!(InputValidator.isNumeric(token) || token.equals(")") || token.equals("%"))) {
             throw new IOException("Incorrect last argument: \"" + token + "\"");
         }
 
@@ -131,7 +128,7 @@ public class ReversePolishNotationConverter {
         if (!previousToken.isEmpty()) {
             checkAdjacentTokens(previousToken, currentToken);
 
-        } else if (MathElements.isOperator(currentToken)
+        } else if (InputValidator.isOperator(currentToken)
                 || currentToken.equals(")") || currentToken.equals(",")) {
 
             throw new IOException("Incorrect first argument: \"currentToken\"");
@@ -143,15 +140,15 @@ public class ReversePolishNotationConverter {
 
         if ((previousToken.equals("(") && currentToken.equals(")"))
                 || (previousToken.equals("(") && currentToken.equals(","))
-                || (previousToken.equals("(") && MathElements.isOperator(currentToken))
+                || (previousToken.equals("(") && InputValidator.isOperator(currentToken))
                 || (previousToken.equals(")") && currentToken.equals("("))
-                || (previousToken.equals(")") && MathElements.isNumber(currentToken))
+                || (previousToken.equals(")") && InputValidator.isNumeric(currentToken))
                 || (previousToken.equals(",") && currentToken.equals(")"))
-                || (previousToken.equals(",") && MathElements.isOperator(currentToken))
-                || (MathElements.isOperator(previousToken) && MathElements.isOperator(currentToken))) {
+                || (previousToken.equals(",") && InputValidator.isOperator(currentToken))
+                || (InputValidator.isOperator(previousToken) && InputValidator.isOperator(currentToken))) {
 
             int bugPosition = findBugPosition();
-            throw new IOException("Uncorrect sequense of math elements \""
+            throw new IOException("Incorrect sequence of math elements \""
                     + previousToken + currentToken + "\" that in the positions #"
                     + (bugPosition - 1) + "-" + bugPosition);
         }
@@ -161,8 +158,8 @@ public class ReversePolishNotationConverter {
 
         String withoutSpaces = originExpression.replace(" ", "");
 
-        StringTokenizer withoutSpacesTokenizer = MathElements.getTokenizer(withoutSpaces);
-        StringTokenizer processedTokenizer = MathElements.getTokenizer(preparedExpression);
+        StringTokenizer withoutSpacesTokenizer = InputValidator.getTokenizer(withoutSpaces);
+        StringTokenizer processedTokenizer = InputValidator.getTokenizer(preparedExpression);
 
         String withoutSpacesToken = withoutSpacesTokenizer.nextToken();
         String processedToken = processedTokenizer.nextToken();

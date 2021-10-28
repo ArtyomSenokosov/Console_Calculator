@@ -1,6 +1,11 @@
 package ru.mail.senokosov.artem;
 
+import ru.mail.senokosov.artem.calculation.CalculatorImpl;
+import ru.mail.senokosov.artem.converter.ReversePolishNotationConverter;
+
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Deque;
 import java.util.List;
 import java.util.Scanner;
 
@@ -8,26 +13,22 @@ public class Calculator {
 
     public static void main(String[] args) {
 
-        String expression = "";
         Scanner input = new Scanner(System.in);
 
         System.out.println("Calculator");
 
-        MathElements.setCalculator();
-
-        double result = 0d;
-        List<String> rpn = null;
         boolean flag = true;
 
         while (flag) {
             System.out.println("Please, enter expression (and press enter): \n");
-            expression = input.nextLine();
+            String expression = input.nextLine();
 
             try {
-                rpn = ReversePolishNotationConverter.sortingStation(expression);
+                List<String> rpn = ReversePolishNotationConverter.sortingStation(expression);
                 System.out.println("reverse polish notation is:");
                 ReversePolishNotationConverter.printRPN(rpn);
-                result = StackMachine.evaluatingReversePolishNotation(rpn);
+                ru.mail.senokosov.artem.calculation.Calculator calculator = new CalculatorImpl();
+                Deque<BigDecimal> result = calculator.calculate(rpn);
 
                 System.out.println("\nresult:\n" + result + "\n");
 
@@ -39,11 +40,7 @@ public class Calculator {
                     + "press any key to another calculation, or \n"
                     + "enter \"E\" to exit.");
 
-            if (!input.nextLine().equalsIgnoreCase("e")) {
-                flag = true;
-            } else {
-                flag = false;
-            }
+            flag = !input.nextLine().equalsIgnoreCase("e");
         }
         input.close();
     }
