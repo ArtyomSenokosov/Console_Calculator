@@ -1,5 +1,6 @@
 package ru.mail.senokosov.artem;
 
+import ru.mail.senokosov.artem.calculation.Calculator;
 import ru.mail.senokosov.artem.calculation.CalculatorImpl;
 import ru.mail.senokosov.artem.converter.ReversePolishNotationConverter;
 
@@ -9,13 +10,13 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Scanner;
 
-public class Calculator {
+public class RPNCalculator {
 
     public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);
 
-        System.out.println("Calculator");
+        System.out.println("RPNCalculator");
 
         boolean flag = true;
 
@@ -27,7 +28,7 @@ public class Calculator {
                 List<String> rpn = ReversePolishNotationConverter.sortingStation(expression);
                 System.out.println("reverse polish notation is:");
                 ReversePolishNotationConverter.printRPN(rpn);
-                ru.mail.senokosov.artem.calculation.Calculator calculator = new CalculatorImpl();
+                Calculator calculator = new CalculatorImpl();
                 Deque<BigDecimal> result = calculator.calculate(rpn);
 
                 System.out.println("\nresult:\n" + result + "\n");

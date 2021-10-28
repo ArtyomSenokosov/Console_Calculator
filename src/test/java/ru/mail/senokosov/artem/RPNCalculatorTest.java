@@ -19,7 +19,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class CalculatorTest {
+public class RPNCalculatorTest {
 
     @Test
     public void main() throws IOException {
